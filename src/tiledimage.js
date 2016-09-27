@@ -934,6 +934,40 @@ function updateViewport( tiledImage ) {
             best
         );
 
+
+        var tileTL    = tiledImage.source.getTileAtPoint( level, viewportTL.divide( tiledImage._scaleSpring.current.value ));
+        var tileBR    = tiledImage.source.getTileAtPoint( level, viewportBR.divide( tiledImage._scaleSpring.current.value ));
+        var numberOfTiles  = tiledImage.source.getNumTiles( level );
+
+        tileBR.x = Math.min( tileBR.x, numberOfTiles.x - 1 );
+        tileBR.y = Math.min( tileBR.y, numberOfTiles.y - 1 );
+
+        var coverage = true, x, y;
+        for ( x = tileTL.x; x <= tileBR.x; x++ ) {
+            for ( y = tileTL.y; y <= tileBR.y; y++ ) {
+                tile = getTile(
+                    x, y,
+                    level,
+                    tiledImage.source,
+                    tiledImage.tilesMatrix,
+                    currentTime,
+                    numberOfTiles,
+                    tiledImage._worldWidthCurrent,
+                    tiledImage._worldHeightCurrent
+                );
+                if (!tile.loaded) { coverage = false; }
+            }
+        }
+        // $.console.log('osd:provides coverage? %s, (%d, %d) - (%d, %d)',
+        //     coverage, tileTL.x, tileTL.y, tileBR.x, tileBR.y);
+        if (coverage) {
+
+            tiledImage._setFullyLoaded(true);
+            break;
+        }
+
+
+
         // Stop the loop if lower-res tiles would all be covered by
         // already drawn tiles
         if (  providesCoverage( tiledImage.coverage, level ) ) {
@@ -950,7 +984,7 @@ function updateViewport( tiledImage ) {
         tiledImage._needsDraw = true;
         tiledImage._setFullyLoaded(false);
     } else {
-        tiledImage._setFullyLoaded(true);
+        // tiledImage._setFullyLoaded(true);
     }
 }
 
